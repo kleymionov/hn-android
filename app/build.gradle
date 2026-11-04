@@ -30,14 +30,12 @@ android {
         applicationId "com.manuelmaly.hn"
         minSdkVersion 14
         targetSdkVersion 33
-        versionCode 26
-        versionName "1.9.16"
+        versionCode 27
+        versionName "1.9.17"
 
-        // AndroidAnnotations cannot find the merged manifest under AGP 8 on its own
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = ["androidManifestFile": "$projectDir/build/intermediates/merged_manifest/debug/processDebugMainManifest/AndroidManifest.xml",
-                             "resourcePackageName": "com.manuelmaly.hn"]
+                arguments = ["resourcePackageName": "com.manuelmaly.hn"]
             }
         }
     }
@@ -56,6 +54,13 @@ android {
     }
 
     buildTypes {
+        // AndroidAnnotations cannot find the merged manifest under AGP 8 on its own
+        all { buildType ->
+            def task = "process${buildType.name.capitalize()}MainManifest"
+            buildType.javaCompileOptions.annotationProcessorOptions.arguments = [
+                "androidManifestFile": "$projectDir/build/intermediates/merged_manifest/${buildType.name}/${task}/AndroidManifest.xml"]
+        }
+
         release {
             minifyEnabled false
             signingConfig signingConfigs.findByName("release")
