@@ -46,7 +46,10 @@ public class HNCommentsParser extends BaseHTMLParser<HNPostComments> {
             // from the text.  As far as I can tell that is the only place
             // where size=1 is used.  If that turns out to not be the case then
             // searching for u tags is also a pretty decent option - @jmaltz
-            Element mainCommentDiv = mainRowElement.select("div.comment > span").first();
+            // HN now wraps comment text in <div class="commtext cXX">; older markup used a <span>
+            Element mainCommentDiv = mainRowElement.select("div.comment > div.commtext").first();
+            if (mainCommentDiv == null)
+                mainCommentDiv = mainRowElement.select("div.comment > span").first();
             if (mainCommentDiv == null)
                 continue;
 
@@ -54,8 +57,9 @@ public class HNCommentsParser extends BaseHTMLParser<HNPostComments> {
 
             // Parse the class attribute to get the comment color
             int commentColor = Color.rgb(0, 0, 0);
-            if (mainCommentDiv.attributes().hasKey("class")) {
-                commentColor = getCommentColor(mainCommentDiv.attributes().get("class"));
+            for (String className : mainCommentDiv.classNames()) {
+                if (!"commtext".equals(className))
+                    commentColor = getCommentColor(className);
             }
 
             // In order to eliminate whitespace at the end of multi-line comments,
@@ -92,18 +96,11 @@ public class HNCommentsParser extends BaseHTMLParser<HNPostComments> {
                 break;
         }
 
-        // Just using table:eq(0) would return an extra table, so we use
-        // get(0) instead, which only returns only the one we want
-        Element header = doc.select("body table:eq(0)  tbody > tr:eq(2) > td:eq(0) > table").get(0);
+        // Self text of Ask HN / Show HN posts
         String headerHtml = null;
-
-        // Five table rows is what it takes for the title, post information
-        // And other boilerplate stuff.  More than five means we have something
-        // Special
-        if (header.select("tr").size() > 5) {
-            HeaderParser headerParser = new HeaderParser();
-            headerHtml = headerParser.parseDocument(header);
-        }
+        Element topText = doc.select("table.fatitem div.toptext").first();
+        if (topText != null)
+            headerHtml = topText.html();
 
 
         return new HNPostComments(comments, headerHtml, currentUser);
