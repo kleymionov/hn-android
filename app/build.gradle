@@ -24,7 +24,7 @@ android {
     compileOptions {
         encoding "UTF-8"
     }
-    compileSdkVersion 33
+    compileSdkVersion 35
 
     defaultConfig {
         applicationId "com.manuelmaly.hn"
@@ -32,13 +32,22 @@ android {
         targetSdkVersion 33
         versionCode 26
         versionName "1.9.16"
+
+        // AndroidAnnotations cannot find the merged manifest under AGP 8 on its own
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["androidManifestFile": "$projectDir/build/intermediates/merged_manifest/debug/processDebugMainManifest/AndroidManifest.xml",
+                             "resourcePackageName": "com.manuelmaly.hn"]
+            }
+        }
     }
 
     signingConfigs {
         def props = new Properties()
-        props.load(new FileInputStream(rootProject.file("release.properties")))
+        def releaseProps = rootProject.file("release.properties")
+        if (releaseProps.exists()) props.load(new FileInputStream(releaseProps))
 
-        release {
+        if (releaseProps.exists()) release {
             storeFile new File(props.keyStore.toString())
             storePassword props.keyStorePassword
             keyAlias props.keyAlias
@@ -49,7 +58,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.findByName("release")
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
 
             applicationVariants.all { variant ->
