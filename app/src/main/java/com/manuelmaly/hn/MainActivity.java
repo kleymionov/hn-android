@@ -164,6 +164,8 @@ public class MainActivity extends BaseListActivity implements
             startFeedLoading();
         }
 
+        refreshAlreadyRead();
+
         // refresh if font size changed
         if (refreshFontSizes()) {
             mPostsListAdapter.notifyDataSetChanged();
@@ -275,14 +277,27 @@ public class MainActivity extends BaseListActivity implements
 
     @Background
     void markAsRead(HNPost post) {
-        Long now = new Date().getTime();
-        String title = post.getTitle();
-        Editor editor = getSharedPreferences(ALREADY_READ_ARTICLES_KEY,
-                Context.MODE_PRIVATE).edit();
-        editor.putLong(title, now);
-        editor.commit();
+        persistAsRead(this, post);
+        mAlreadyRead.add(post.getTitle().hashCode());
+    }
 
-        mAlreadyRead.add(title.hashCode());
+    // Also called by CommentsActivity, which opens articles without going through the list
+    public static void persistAsRead(Context context, HNPost post) {
+        context.getSharedPreferences(ALREADY_READ_ARTICLES_KEY, Context.MODE_PRIVATE)
+                .edit().putLong(post.getTitle(), new Date().getTime()).apply();
+    }
+
+    // Picks up posts marked as read by other activities while this one was paused
+    private void refreshAlreadyRead() {
+        if (mAlreadyRead == null)
+            return;
+        Map<String, ?> read = getSharedPreferences(ALREADY_READ_ARTICLES_KEY,
+                Context.MODE_PRIVATE).getAll();
+        int before = mAlreadyRead.size();
+        for (String title : read.keySet())
+            mAlreadyRead.add(title.hashCode());
+        if (mAlreadyRead.size() != before)
+            mPostsListAdapter.notifyDataSetChanged();
     }
 
     private void showFeed(HNFeed feed) {

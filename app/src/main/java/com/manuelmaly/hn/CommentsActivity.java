@@ -138,6 +138,7 @@ public class CommentsActivity extends BaseListActivity implements
             public void onClick(View v) {
                 if (Settings.getHtmlViewer(CommentsActivity.this).equals(
                         getString(R.string.pref_htmlviewer_browser))) {
+                    MainActivity.persistAsRead(CommentsActivity.this, mPost);
 
                     String articleURL = ArticleReaderActivity
                             .getArticleViewURL(mPost, Settings
@@ -369,6 +370,7 @@ public class CommentsActivity extends BaseListActivity implements
     }
 
     private void openArticleReader() {
+        MainActivity.persistAsRead(this, mPost);
         Intent intent = new Intent(this, ArticleReaderActivity_.class);
         intent.putExtra(CommentsActivity.EXTRA_HNPOST, mPost);
         if (getIntent().getStringExtra(
