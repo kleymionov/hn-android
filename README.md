@@ -1,4 +1,6 @@
-<img src="app/design/appstore_icon.png" width="96" alt="HN app icon">
+![HN app icon](app/src/main/res/drawable-xhdpi/ic_launcher.png)
+
+A revived version of the classic HN app for reading Hacker News, with a focus on reliability and usability.
 
 HN (Android)
 ============
