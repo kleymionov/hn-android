@@ -87,6 +87,8 @@ public class MainActivity extends BaseListActivity implements
     int mFontSizeDetails;
     int mTitleColor;
     int mTitleReadColor;
+    int mCommentsColor;
+    int mCommentsSeenColor;
 
     private static final int TASKCODE_LOAD_FEED = 10;
     private static final int TASKCODE_LOAD_MORE_POSTS = 20;
@@ -135,6 +137,8 @@ public class MainActivity extends BaseListActivity implements
 
         mTitleColor = getResources().getColor(R.color.dark_gray_post_title);
         mTitleReadColor = getResources().getColor(R.color.gray_post_title_read);
+        mCommentsColor = getResources().getColor(R.color.gray_comments_count);
+        mCommentsSeenColor = getResources().getColor(R.color.gray_comments_count_seen);
 
         toggleSwipeRefreshLayout();
 
@@ -285,6 +289,16 @@ public class MainActivity extends BaseListActivity implements
     public static void persistAsRead(Context context, HNPost post) {
         context.getSharedPreferences(ALREADY_READ_ARTICLES_KEY, Context.MODE_PRIVATE)
                 .edit().putLong(post.getTitle(), new Date().getTime()).apply();
+    }
+
+    // Shares the already-read store and its expiry; the prefix keeps it apart from titles
+    private static String commentsSeenKey(HNPost post) {
+        return "comments:" + post.getPostID();
+    }
+
+    public static void persistCommentsSeen(Context context, HNPost post) {
+        context.getSharedPreferences(ALREADY_READ_ARTICLES_KEY, Context.MODE_PRIVATE)
+                .edit().putLong(commentsSeenKey(post), new Date().getTime()).apply();
     }
 
     // Picks up posts marked as read by other activities while this one was paused
@@ -499,6 +513,8 @@ public class MainActivity extends BaseListActivity implements
                 if (item.getCommentsCount() != BaseHTMLParser.UNDEFINED) {
                     holder.commentsButton.setVisibility(View.VISIBLE);
                     holder.commentsButton.setText(item.getCommentsCount() + "");
+                    holder.commentsButton.setTextColor(isCommentsSeen(item)
+                            ? mCommentsSeenColor : mCommentsColor);
                 } else {
                     holder.commentsButton.setVisibility(View.INVISIBLE);
                 }
@@ -583,6 +599,10 @@ public class MainActivity extends BaseListActivity implements
 
         private boolean isRead(HNPost post) {
             return mAlreadyRead.contains(post.getTitle().hashCode());
+        }
+
+        private boolean isCommentsSeen(HNPost post) {
+            return mAlreadyRead.contains(commentsSeenKey(post).hashCode());
         }
 
         private void startCommentActivity(int position){

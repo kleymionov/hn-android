@@ -108,6 +108,8 @@ public class CommentsActivity extends BaseListActivity implements
     @AfterViews
     public void init() {
         mPost = (HNPost) getIntent().getSerializableExtra(EXTRA_HNPOST);
+        if (mPost != null && mPost.getPostID() != null)
+            MainActivity.persistCommentsSeen(this, mPost);
         if (mPost == null || mPost.getPostID() == null) {
             Toast.makeText(this, "The belonging post has not been loaded",
                     Toast.LENGTH_LONG).show();
