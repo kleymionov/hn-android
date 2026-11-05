@@ -30,8 +30,8 @@ android {
         applicationId "com.manuelmaly.hn"
         minSdkVersion 14
         targetSdkVersion 33
-        versionCode 27
-        versionName "1.9.17"
+        versionCode 28
+        versionName "1.9.18"
 
         javaCompileOptions {
             annotationProcessorOptions {
