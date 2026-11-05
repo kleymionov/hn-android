@@ -58,7 +58,7 @@ android {
         all { buildType ->
             def task = "process${buildType.name.capitalize()}MainManifest"
             buildType.javaCompileOptions.annotationProcessorOptions.arguments = [
-                "androidManifestFile": "$projectDir/build/intermediates/merged_manifest/${buildType.name}/${task}/AndroidManifest.xml"]
+                "androidManifestFile": "$buildDir/intermediates/merged_manifest/${buildType.name}/${task}/AndroidManifest.xml"]
         }
 
         release {
